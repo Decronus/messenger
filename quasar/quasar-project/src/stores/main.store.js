@@ -6,6 +6,7 @@ export const mainStore = defineStore("main", {
       user: {
         id: `user${Date.now()}`,
         name: "Гость",
+        avatar: "",
       },
     };
   },
@@ -13,6 +14,9 @@ export const mainStore = defineStore("main", {
   actions: {
     setUserName(value) {
       this.user.name = value;
+    },
+    setAvatarName(value) {
+      this.user.avatar = value;
     },
   },
 });
