@@ -5,7 +5,7 @@ export const mainStore = defineStore("main", {
     return {
       usersOnline: 0,
       user: {
-        id: `user${Date.now()}`,
+        id: "",
         name: "Гость",
         avatar: "",
       },
@@ -13,6 +13,9 @@ export const mainStore = defineStore("main", {
   },
   getters: {},
   actions: {
+    setUserId(value) {
+      this.user.id = value;
+    },
     setUserName(value) {
       this.user.name = value;
     },

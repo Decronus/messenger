@@ -54,7 +54,7 @@
         </q-card-section>
 
         <q-card-actions align="right" class="text-primary">
-          <q-btn flat label="Войти" @click="enterChat" />
+          <q-btn flat label="Войти" @click="socket.connect()" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -103,6 +103,8 @@ export default defineComponent({
     },
 
     checkMyMessage(el) {
+      console.log("el.user.id", el.user.id);
+      console.log("store.user.id", store.user.id);
       return el.user.id === store.user.id;
     },
 
@@ -111,16 +113,16 @@ export default defineComponent({
     },
 
     enterChat() {
-      this.socket.connect();
+      //   this.socket.connect();
+      console.log("enter chat", this.socket.id);
+      store.user.id = this.socket.id;
       this.socket.emit("message", {
-        data: {
-          id: Date.now(),
-          message: {
-            text: `${store.user.name} подключился`,
-            status: "enterChat",
-          },
-          user: store.user,
+        id: Date.now(),
+        message: {
+          text: `${store.user.name} подключился`,
+          status: "enterChat",
         },
+        user: store.user,
       });
       this.nameModal = false;
     },
@@ -131,36 +133,35 @@ export default defineComponent({
       return Math.floor(Math.random() * (max - min + 1)) + min;
     },
 
-    leaveChat() {
-      console.log("leave chat f");
-      this.socket.emit("message", {
-        data: {
-          id: Date.now(),
-          message: {
-            text: `${store.user.name} отключился`,
-            status: "enterChat",
-          },
-          user: store.user,
-        },
-      });
-    },
+    // leaveChat() {
+    //   console.log("leave chat f");
+    //   this.socket.emit("message", {
+    //     data: {
+    //       id: Date.now(),
+    //       message: {
+    //         text: `${store.user.name} отключился`,
+    //         status: "enterChat",
+    //       },
+    //       user: store.user,
+    //     },
+    //   });
+    // },
 
     getMessageColor(el) {
       return el.message.status === "message" ? null : "positive";
     },
 
     sendMessage() {
+      console.log("messages", this.messages);
       if (!this.inputMessage) return;
 
       this.socket.emit("message", {
-        data: {
-          id: Date.now(),
-          message: {
-            text: this.inputMessage,
-            status: "message",
-          },
-          user: store.user,
+        id: Date.now(),
+        message: {
+          text: this.inputMessage,
+          status: "message",
         },
+        user: store.user,
       });
       this.inputMessage = "";
     },
@@ -214,17 +215,19 @@ export default defineComponent({
 
     this.socket.on("connect", () => {
       store.user.id = this.socket.id;
+      this.enterChat();
       this.socket.emit("userConnected", {
-        id: this.socket.id,
+        id: store.user.id,
         name: store.user.name,
       });
+      console.log("store user id", store.user.id);
     });
 
-    this.socket.on("disconnect", () => {
-      this.leaveChat();
-    });
+    // this.socket.on("disconnect", () => {
+    //   this.leaveChat();
+    // });
 
-    this.socket.on("message", ({ data }) => {
+    this.socket.on("message", (data) => {
       this.messages.push(data);
     });
 
