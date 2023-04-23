@@ -12,6 +12,7 @@
         />
 
         <q-toolbar-title> Chat </q-toolbar-title>
+        <p>{{ usersOnline ? usersOnline : null }}</p>
       </q-toolbar>
     </q-header>
 
@@ -24,6 +25,9 @@
 <script>
 import { defineComponent, ref } from "vue";
 import EssentialLink from "components/EssentialLink.vue";
+import { mainStore } from "../stores/main.store";
+
+const store = mainStore();
 
 const linksList = [
   {
@@ -75,6 +79,12 @@ export default defineComponent({
 
   components: {
     EssentialLink,
+  },
+
+  computed: {
+    usersOnline() {
+      return store.usersOnline;
+    },
   },
 
   setup() {

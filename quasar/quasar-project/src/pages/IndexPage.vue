@@ -6,13 +6,18 @@
         <q-chat-message
           v-for="el in messages"
           :name="checkMyName(el)"
-          :avatar="el.user.avatar"
+          :avatar="
+            el.user.avatar
+              ? el.user.avatar
+              : 'https://w7.pngwing.com/pngs/994/729/png-transparent-exclamation-mark-poster-exclamation-mark-wikimedia-commons-icon-exclamation-mark-angle-text-orange.png'
+          "
           :key="el.id"
           :text="[el.message.text]"
           :sent="checkMyMessage(el)"
           :stamp="getTime"
           :bg-color="getMessageColor(el)"
           :text-color="getMessageColor(el) ? 'white' : null"
+          @click="this.socket.disconnect()"
         />
       </div>
     </div>
@@ -22,10 +27,12 @@
       v-model="inputMessage"
       @keyup.enter.prevent="sendMessage"
       label="Cообщение..."
-      suffix-icon="clear"
       class="bottom-message-input"
       square
     >
+      <template v-slot:prepend>
+        <q-icon name="attachment" class="cursor-pointer" />
+      </template>
       <template v-slot:append>
         <q-icon name="send" class="cursor-pointer" @click="sendMessage" />
       </template>
@@ -60,7 +67,6 @@ import { io } from "socket.io-client";
 import { mainStore } from "../stores/main.store";
 import { mapState } from "pinia";
 
-const socket = io("http://127.0.0.1:3005");
 const store = mainStore();
 
 export default defineComponent({
@@ -68,11 +74,11 @@ export default defineComponent({
 
   data() {
     return {
+      socket: null,
       messages: [],
       inputMessage: "",
       nameModal: true,
-      prevDate: "",
-      currDate: "",
+      usersOnline: 0,
       avatarList: [
         "https://gamerwall.pro/uploads/posts/2022-09/1662304672_2-gamerwall-pro-p-samie-smeshnie-zhivotnie-v-mire-krasivo-2.jpg",
         "https://kaifolog.ru/uploads/posts/2015-05/1431921595_019.jpg",
@@ -105,7 +111,8 @@ export default defineComponent({
     },
 
     enterChat() {
-      socket.emit("message", {
+      this.socket.connect();
+      this.socket.emit("message", {
         data: {
           id: Date.now(),
           message: {
@@ -125,7 +132,8 @@ export default defineComponent({
     },
 
     leaveChat() {
-      socket.emit("message", {
+      console.log("leave chat f");
+      this.socket.emit("message", {
         data: {
           id: Date.now(),
           message: {
@@ -144,7 +152,7 @@ export default defineComponent({
     sendMessage() {
       if (!this.inputMessage) return;
 
-      socket.emit("message", {
+      this.socket.emit("message", {
         data: {
           id: Date.now(),
           message: {
@@ -171,8 +179,6 @@ export default defineComponent({
     ...mapState(mainStore, ["user"]),
 
     getCurrDate() {
-      this.prevDate = this.currDate;
-
       const date = new Date();
       const day = date.getDate();
       const month = date.getMonth() + 1;
@@ -184,8 +190,6 @@ export default defineComponent({
     },
 
     getCurrDate() {
-      this.prevDate = this.currDate;
-
       const date = new Date();
       const day = date.getDate();
       const month = date.getMonth() + 1;
@@ -205,24 +209,35 @@ export default defineComponent({
   },
 
   mounted() {
+    this.socket = io.connect("http://127.0.0.1:3005", { autoConnect: false });
     store.setAvatarName(this.avatarRandomChoice());
 
-    socket.on("connect", () => {
-      store.user.id = socket.id;
+    this.socket.on("connect", () => {
+      store.user.id = this.socket.id;
+      this.socket.emit("userConnected", {
+        id: this.socket.id,
+        name: store.user.name,
+      });
     });
 
-    socket.on("disconnect", () => {
-      console.log("leave");
+    this.socket.on("disconnect", () => {
       this.leaveChat();
     });
 
-    socket.on("message", ({ data }) => {
+    this.socket.on("message", ({ data }) => {
       this.messages.push(data);
+    });
+
+    this.socket.on("usersOnline", (users) => {
+      console.log("users", users);
+      store.setUsersOnline(Object.keys(users).length);
+      //   this.usersOnline = Object.keys(data).length;
+      console.log(this.usersOnline, "online");
     });
   },
 
   beforeUnmount() {
-    socket.disconnect();
+    this.socket.disconnect();
   },
 });
 </script>

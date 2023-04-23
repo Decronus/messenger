@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 export const mainStore = defineStore("main", {
   state: () => {
     return {
+      usersOnline: 0,
       user: {
         id: `user${Date.now()}`,
         name: "Гость",
@@ -17,6 +18,9 @@ export const mainStore = defineStore("main", {
     },
     setAvatarName(value) {
       this.user.avatar = value;
+    },
+    setUsersOnline(value) {
+      this.usersOnline = value;
     },
   },
 });
