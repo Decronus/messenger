@@ -49,7 +49,7 @@
             dense
             v-model="userName"
             autofocus
-            @keyup.enter="enterChat"
+            @keyup.enter="socket.connect()"
           />
         </q-card-section>
 
@@ -220,7 +220,6 @@ export default defineComponent({
         id: store.user.id,
         name: store.user.name,
       });
-      console.log("store user id", store.user.id);
     });
 
     // this.socket.on("disconnect", () => {
@@ -234,8 +233,6 @@ export default defineComponent({
     this.socket.on("usersOnline", (users) => {
       console.log("users", users);
       store.setUsersOnline(Object.keys(users).length);
-      //   this.usersOnline = Object.keys(data).length;
-      console.log(this.usersOnline, "online");
     });
   },
 

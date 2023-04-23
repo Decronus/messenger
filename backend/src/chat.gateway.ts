@@ -59,8 +59,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log('message data', messageData);
     const clientId = messageData.user.id;
     const clientName = messageData.user.name;
-    this.connectedUsers[clientId].name = clientName;
-    // console.log('this.connectedUsers', this.connectedUsers);
+    console.log('this.connectedUsers[clientId]', this.connectedUsers[clientId]);
+    this.connectedUsers[clientId] = { name: clientName };
+    console.log('this.connectedUsers', this.connectedUsers);
   }
 
   @SubscribeMessage('userConnected')

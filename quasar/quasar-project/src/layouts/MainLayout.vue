@@ -12,7 +12,12 @@
         />
 
         <q-toolbar-title> Chat </q-toolbar-title>
-        <p>{{ usersOnline ? usersOnline : null }}</p>
+        <div class="online-amount-wrap flex flex-center" v-if="usersOnline">
+          <div class="online-amount-icon q-mr-xs"></div>
+          <q-paragraph>
+            {{ usersOnline ? `Онлайн: ${usersOnline}` : null }}</q-paragraph
+          >
+        </div>
       </q-toolbar>
     </q-header>
 
@@ -100,3 +105,12 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.online-amount-icon {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgb(11, 199, 11);
+}
+</style>

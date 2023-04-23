@@ -6,7 +6,7 @@ export const mainStore = defineStore("main", {
       usersOnline: 0,
       user: {
         id: "",
-        name: "Гость",
+        name: "",
         avatar: "",
       },
     };
